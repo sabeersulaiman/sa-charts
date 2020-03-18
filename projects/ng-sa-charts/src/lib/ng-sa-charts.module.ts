@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
+import { SaLineChartMiniComponent } from './components/line-chart-mini/line-chart-mini.component';
 
 @NgModule({
-    declarations: [],
+    declarations: [SaLineChartMiniComponent],
     imports: [],
-    exports: []
+    exports: [SaLineChartMiniComponent]
 })
 export class NgSaChartsModule {}

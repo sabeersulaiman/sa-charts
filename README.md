@@ -1,27 +1,28 @@
 # SaCharts
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.3.
+Beautiful charts for beautiful applications. Currently supports:
 
-## Development server
+-   Line Chart Mini
+-   Line Chart
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Using the charts
 
-## Code scaffolding
+TODO
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Development
 
-## Build
+Feel free to fork and make your own changes. PRs are welcome for desirable changes.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+In one terminal run the following command to start the library build:
 
-## Running unit tests
+```sh
+yarn lib-dev
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+In second terminal run the following command to build the demo application:
 
-## Running end-to-end tests
+```sh
+yarn demo-devs
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+You can also choose to link the library to your own project if required, after running the `yarn lib-build` once.
