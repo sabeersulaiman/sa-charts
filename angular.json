@@ -1,6 +1,171 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1, 
+  "version": 1,
   "newProjectRoot": "projects",
-  "projects": {}
+  "projects": {
+    "ng-sa-charts": {
+      "projectType": "library",
+      "root": "projects/ng-sa-charts",
+      "sourceRoot": "projects/ng-sa-charts/src",
+      "prefix": "sa",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ng-sa-charts/tsconfig.lib.json",
+            "project": "projects/ng-sa-charts/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ng-sa-charts/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng-sa-charts/src/test.ts",
+            "tsConfig": "projects/ng-sa-charts/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-sa-charts/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng-sa-charts/tsconfig.lib.json",
+              "projects/ng-sa-charts/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "sa-charts-demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/sa-charts-demo",
+      "sourceRoot": "projects/sa-charts-demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/sa-charts-demo",
+            "index": "projects/sa-charts-demo/src/index.html",
+            "main": "projects/sa-charts-demo/src/main.ts",
+            "polyfills": "projects/sa-charts-demo/src/polyfills.ts",
+            "tsConfig": "projects/sa-charts-demo/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/sa-charts-demo/src/favicon.ico",
+              "projects/sa-charts-demo/src/assets"
+            ],
+            "styles": [
+              "projects/sa-charts-demo/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/sa-charts-demo/src/environments/environment.ts",
+                  "with": "projects/sa-charts-demo/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "sa-charts-demo:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "sa-charts-demo:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "sa-charts-demo:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/sa-charts-demo/src/test.ts",
+            "polyfills": "projects/sa-charts-demo/src/polyfills.ts",
+            "tsConfig": "projects/sa-charts-demo/tsconfig.spec.json",
+            "karmaConfig": "projects/sa-charts-demo/karma.conf.js",
+            "assets": [
+              "projects/sa-charts-demo/src/favicon.ico",
+              "projects/sa-charts-demo/src/assets"
+            ],
+            "styles": [
+              "projects/sa-charts-demo/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/sa-charts-demo/tsconfig.app.json",
+              "projects/sa-charts-demo/tsconfig.spec.json",
+              "projects/sa-charts-demo/e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/sa-charts-demo/e2e/protractor.conf.js",
+            "devServerTarget": "sa-charts-demo:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "sa-charts-demo:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "cli": {
+    "analytics": "cf00843c-57b4-4233-bf78-ecbdb352c61a"
+  },
+  "defaultProject": "ng-sa-charts"
 }

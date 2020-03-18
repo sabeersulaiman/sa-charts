@@ -17,7 +17,13 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ng-sa-charts": [
+        "dist/ng-sa-charts/ng-sa-charts",
+        "dist/ng-sa-charts"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
