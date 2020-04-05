@@ -5,7 +5,7 @@ import {
     CurveFactory,
     CurveBundleFactory
 } from 'd3';
-import { curveTypes } from '../models/line-data.model';
+import { curveTypes } from '../models/chart-data.model';
 
 /**
  * get the curve from curve string

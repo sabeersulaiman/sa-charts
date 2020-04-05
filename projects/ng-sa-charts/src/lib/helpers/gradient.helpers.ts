@@ -4,12 +4,6 @@ export function defineColorFadingGradient(
     color: string,
     defs: Selection<SVGDefsElement, any, any, any>
 ) {
-    /*
-    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:rgb(255,0,0);stop-opacity:1" />
-      <stop offset="100%" style="stop-color:rgb(255,255,0);stop-opacity:1" />
-    </linearGradient>
-     */
     const colorId = getIdFromColor(color, false);
 
     if (
@@ -42,7 +36,11 @@ export function defineColorFadingGradient(
 export function getIdFromColor(color: string, needPound = true) {
     let id = '';
     for (const c of color) {
-        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+        if (
+            (c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9')
+        ) {
             id += c;
         }
     }

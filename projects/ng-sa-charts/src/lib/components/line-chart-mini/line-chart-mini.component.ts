@@ -7,7 +7,8 @@ import {
     HostListener
 } from '@angular/core';
 import { LineChartMini } from '../../charts/line-chart-mini';
-import { SaLineChartData, LineChartConfig } from '../../models/line-data.model';
+import { SaChartDimensions, SaChartData } from '../../models/chart-data.model';
+import { LineChartConfig } from '../../models/line-data.model';
 
 @Component({
     selector: 'sa-line-chart-mini',
@@ -18,7 +19,7 @@ export class SaLineChartMiniComponent implements AfterViewInit {
     /**
      * field for data
      */
-    private _data: SaLineChartData;
+    private _data: SaChartData;
 
     /**
      * data for the chart
@@ -27,7 +28,7 @@ export class SaLineChartMiniComponent implements AfterViewInit {
     public get data() {
         return this._data;
     }
-    public set data(v: SaLineChartData) {
+    public set data(v: SaChartData) {
         this._data = v;
         this._render();
     }
@@ -74,6 +75,20 @@ export class SaLineChartMiniComponent implements AfterViewInit {
     }
 
     /**
+     * Chart dimensions
+     */
+    private _dimensions: SaChartDimensions;
+
+    @Input()
+    public get dimensions() {
+        return this._dimensions;
+    }
+    public set dimensions(v: SaChartDimensions) {
+        this._dimensions = v;
+        this._render();
+    }
+
+    /**
      * container of the chart
      */
     @ViewChild('container')
@@ -110,7 +125,6 @@ export class SaLineChartMiniComponent implements AfterViewInit {
      * render the chart onto the chart container
      */
     private _render() {
-        console.log('Render called!');
         if (
             this.data &&
             this.chartContainer &&
@@ -119,7 +133,8 @@ export class SaLineChartMiniComponent implements AfterViewInit {
             const config: LineChartConfig = {
                 curve: this.curve,
                 showArea: this.showArea,
-                strokeWidth: this._strokeWidth
+                strokeWidth: this._strokeWidth,
+                dimensions: this._dimensions
             };
 
             this._chart.render(

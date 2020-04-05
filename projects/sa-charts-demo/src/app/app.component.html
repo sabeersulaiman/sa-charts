@@ -1,8 +1,9 @@
 <sa-line-chart-mini
     [data]="data"
-    [curve]="curveTypes.bundleBeta1"
+    [curve]="curveTypes.natural"
     [showArea]="true"
     [strokeWidth]="4"
+    [dimensions]="dems"
 ></sa-line-chart-mini>
 <button (click)="addSeries()" type="button">Add Series</button>
 <button (click)="updateSeries()" type="button">Update Series</button>

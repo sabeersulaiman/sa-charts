@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { SaLineChartData, curveTypes } from 'ng-sa-charts';
+import { SaChartData, curveTypes } from 'ng-sa-charts';
+import { toChartData, generateData } from './data';
+import { SaChartDimensions } from 'projects/ng-sa-charts/src/public-api';
+import { timeDay, timeMonth, timeHour } from 'd3';
 
 @Component({
     selector: 'app-root',
@@ -7,40 +10,40 @@ import { SaLineChartData, curveTypes } from 'ng-sa-charts';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+    dems: SaChartDimensions = {
+        width: 440,
+        height: 300,
+        margins: {
+            top: 100,
+            bottom: 50,
+            left: 0,
+            right: 0
+        }
+    };
     curveTypes = curveTypes;
-    data: SaLineChartData = {
+    data: SaChartData = {
         series: [
             {
-                data: [0, 1, 3, 4, 0, 10, 5, 5, 3, 7, 14, 10],
+                data: toChartData(generateData(timeHour, 1, 30)),
                 name: 'Series - A',
                 color: 'green'
             }
         ],
         xAxis: {
-            title: 'Months',
-            labels: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'
-            ]
+            timeData: true,
+            extendAreaToAxis: true,
+            // labelTransforms: 'rotate(70 30)',
+            disabled: false,
+            labelRotation: 335
         }
     };
 
     addSeries() {
-        this.data.series.push(this.getNewSeries(12));
-        this.data = {
-            series: this.data.series,
-            xAxis: this.data.xAxis
-        };
+        // this.data.series.push(this.getNewSeries(12));
+        // this.data = {
+        //     series: this.data.series,
+        //     xAxis: this.data.xAxis
+        // };
     }
 
     getNewSeries(count: number) {
@@ -57,13 +60,12 @@ export class AppComponent {
     }
 
     updateSeries() {
-        for (let i = 0; i < this.data.series.length; i++) {
-            this.data.series[i] = this.getNewSeries(12);
-        }
-
-        this.data = {
-            series: this.data.series,
-            xAxis: this.data.xAxis
-        };
+        // for (let i = 0; i < this.data.series.length; i++) {
+        //     this.data.series[i] = this.getNewSeries(12);
+        // }
+        // this.data = {
+        //     series: this.data.series,
+        //     xAxis: this.data.xAxis
+        // };
     }
 }
