@@ -1,11 +1,10 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { SaLineChartMiniComponent } from './components/line-chart-mini/line-chart-mini.component';
-import { SaAreaChartComponent } from './components/area-chart/area-chart.component';
+import { SaLineChartComponent } from './components/line-chart/line-chart.component';
 
 @NgModule({
-    declarations: [SaLineChartMiniComponent, SaAreaChartComponent],
+    declarations: [SaLineChartComponent],
     imports: [],
-    exports: [SaLineChartMiniComponent, SaAreaChartComponent],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    exports: [SaLineChartComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class NgSaChartsModule {}

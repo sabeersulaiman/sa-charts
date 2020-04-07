@@ -11,11 +11,11 @@ import { SaChartDimensions, SaChartData } from '../../models/chart-data.model';
 import { LineChartConfig } from '../../models/line-data.model';
 
 @Component({
-    selector: 'sa-line-chart-mini',
-    templateUrl: './line-chart-mini.component.html',
-    styleUrls: ['./line-chart-mini.component.scss']
+    selector: 'sa-line-chart',
+    templateUrl: './line-chart.component.html',
+    styleUrls: ['./line-chart.component.scss']
 })
-export class SaLineChartMiniComponent implements AfterViewInit {
+export class SaLineChartComponent implements AfterViewInit {
     /**
      * field for data
      */
