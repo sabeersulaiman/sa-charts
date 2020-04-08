@@ -8,23 +8,22 @@ import {
     scaleOrdinal,
     area,
     sum,
-    selectAll,
-    scaleTime
+    scaleTime,
 } from 'd3';
 import { SaChartDimensions, SaChartData } from '../models/chart-data.model';
 import { getCurveFromString } from '../helpers/curve.helpers';
 import {
     defineColorFadingGradient,
-    getIdFromColor
+    getIdFromColor,
 } from '../helpers/gradient.helpers';
 import { computeChartMetrics } from '../helpers/chart.helper';
 
-export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
+export class LineChart implements Chart<SaChartData, LineChartConfig> {
     private _dems: SaChartDimensions = {
         margins: {
             top: 10,
-            bottom: 10
-        }
+            bottom: 10,
+        },
     };
 
     constructor() {}
@@ -55,6 +54,9 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
             .attr('width', chartMetrics.svgWidth)
             .attr('height', chartMetrics.svgHeight);
 
+        // set the height for height correction
+        svgContainer.style('height', chartMetrics.svgHeight + 'px');
+
         if (config.showArea) {
             // add defs for gradients
             svg.select('defs').remove();
@@ -65,7 +67,7 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
                     const series = data.series[i];
 
                     defineColorFadingGradient(
-                        series.color || colorScale(i.toString()),
+                        (series.color as string) || colorScale(i.toString()),
                         defs
                     );
                 }
@@ -81,32 +83,35 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
             .range(chartMetrics.yRange);
 
         const lineGenerator = line<(number | number[])[]>()
-            .x(d => {
+            .x((d) => {
                 return xScale(d[0] as number);
             })
-            .y(d => {
+            .y((d) => {
                 return yScale(Array.isArray(d[1]) ? sum(d[1]) : d[1]);
             })
             .curve(getCurveFromString(config.curve));
 
         svg.selectAll('path.sa-path')
-            .data(d => d.series)
+            .data((d) => d.series)
             .enter()
             .insert('path')
             .classed('sa-path', true)
             .merge(svg.selectAll('path.sa-path'))
-            .attr('d', d => {
+            .attr('d', (d) => {
                 return lineGenerator(d.data as number[][]);
             })
             .attr('fill', 'none')
             .attr('stroke-width', config.strokeWidth)
-            .attr('stroke', (d, i) => d.color || colorScale(i.toString()))
+            .attr(
+                'stroke',
+                (d, i) => (d.color as string) || colorScale(i.toString())
+            )
             .exit()
             .remove();
 
         if (config.showArea) {
             const areaGenerator = area<number[]>()
-                .x(d => {
+                .x((d) => {
                     return xScale(d[0]);
                 })
                 .y1((d: number[]) =>
@@ -116,19 +121,19 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
                 .curve(getCurveFromString(config.curve) as any);
 
             svg.selectAll('path.sa-area-path')
-                .data(d => d.series)
+                .data((d) => d.series)
                 .enter()
                 .insert('path')
                 .classed('sa-area-path', true)
                 .merge(svg.selectAll('path.sa-area-path'))
-                .attr('d', d => {
+                .attr('d', (d) => {
                     return areaGenerator(d.data as number[][]);
                 })
                 .attr(
                     'fill',
                     (d, i) =>
                         `url(${getIdFromColor(
-                            d.color || colorScale(i.toString())
+                            (d.color as string) || colorScale(i.toString())
                         )})`
                 )
                 .attr('stroke', 'none')
@@ -148,7 +153,7 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
                 .classed('x-axis', true)
                 .exit()
                 .remove()
-                .merge(selectAll('g.x-axis'));
+                .merge(svg.selectAll('g.x-axis'));
 
             const labels = group
                 .selectAll('text.x-axis-label')
@@ -158,21 +163,22 @@ export class LineChartMini implements Chart<SaChartData, LineChartConfig> {
                 .enter()
                 .append('text')
                 .classed('x-axis-label', true)
-                .merge(selectAll('text.x-axis-label') as any)
-                .text(d => d.text)
+                .merge(svg.selectAll('text.x-axis-label') as any)
+                .text((d) => d.text)
                 .attr('text-anchor', 'middle')
-                .attr('x', d => xScale(d.x))
+                .attr('x', (d) => xScale(d.x))
                 .attr('y', chartMetrics.xAxisLabelStart)
                 .style('font-size', '13px')
                 // .attr('text-anchor', 'middle')
-                .each(function(d, i) {
+                .each((d, i, texts) => {
+                    const text = texts[i];
                     if (data.xAxis.labelRotation) {
                         const xy = {
-                            x: Number(this.getAttribute('x')),
-                            y: Number(this.getAttribute('y'))
+                            x: Number(text.getAttribute('x')),
+                            y: Number(text.getAttribute('y')),
                         };
 
-                        select(this).attr(
+                        select(text).attr(
                             'transform',
                             `rotate(${data.xAxis.labelRotation}, ${xy.x}, ${xy.y})`
                         );

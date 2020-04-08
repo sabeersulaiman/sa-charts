@@ -9,7 +9,7 @@ import {
     timeMonth,
     timeFormat,
     timeMinute,
-    timeWeek
+    timeWeek,
 } from 'd3';
 
 function fixDemensions(node: HTMLElement, dems: SaChartDimensions) {
@@ -21,8 +21,8 @@ function fixDemensions(node: HTMLElement, dems: SaChartDimensions) {
             top: 50,
             left: 50,
             bottom: 50,
-            right: 50
-        }
+            right: 50,
+        },
     };
 
     if (dems) {
@@ -64,7 +64,8 @@ function fixDemensions(node: HTMLElement, dems: SaChartDimensions) {
 export function computeChartMetrics(
     node: HTMLElement,
     dems: SaChartDimensions,
-    data: SaChartData
+    data: SaChartData,
+    xAxisScaled: boolean = true
 ): ChartMetrics {
     const metrics: ChartMetrics = {};
     const xAxisHeight = 50;
@@ -110,20 +111,22 @@ export function computeChartMetrics(
             if (Array.isArray(dataPoint)) {
                 const arr = dataPoint as (number | number[])[];
 
-                let pointYSum: number;
-                if (Array.isArray(arr[1])) {
-                    // we have multiple blocks of data
-                    pointYSum = sum(arr[1]);
-                } else {
-                    pointYSum = arr[1];
+                const pointYSum: number[] = [];
+                for (let i = 1; i < arr.length; i++) {
+                    if (Array.isArray(arr[i])) {
+                        // we have multiple blocks of data
+                        pointYSum.push(sum(arr[i] as number[]));
+                    } else {
+                        pointYSum.push(arr[i] as number);
+                    }
                 }
 
-                if (!(metrics.yDataMin < pointYSum)) {
-                    metrics.yDataMin = pointYSum;
+                if (!(metrics.yDataMin < Math.min(...pointYSum))) {
+                    metrics.yDataMin = Math.min(...pointYSum);
                 }
 
-                if (!(metrics.yDataMax > pointYSum)) {
-                    metrics.yDataMax = pointYSum;
+                if (!(metrics.yDataMax > Math.max(...pointYSum))) {
+                    metrics.yDataMax = Math.max(...pointYSum);
                 }
             }
         }
@@ -141,14 +144,14 @@ export function computeChartMetrics(
     metrics.xDomain = [metrics.xDataMin, metrics.xDataMax];
     metrics.xRange = [
         dems.margins.left,
-        metrics.chartWidth + dems.margins.left
+        metrics.chartWidth + dems.margins.left,
     ];
 
     metrics.yDomain = [metrics.yDataMin, metrics.yDataMax];
     metrics.yRange = [metrics.chartHeight + dems.margins.top, dems.margins.top];
 
     // generate the axes
-    if (!data.xAxis.disabled && data.xAxis.timeData) {
+    if (!data.xAxis.disabled && data.xAxis.timeData && xAxisScaled) {
         if (data.xAxis.extendAreaToAxis) {
             metrics.xAxisInclusiveArea = metrics.yRange[0] + xAxisHeight;
         }
@@ -164,6 +167,45 @@ export function computeChartMetrics(
             metrics.xAxisPoints = metrics.xAxisPoints.filter(
                 (_x, i) => i !== metrics.xAxisPoints.length - 1
             );
+        }
+    } else if (!data.xAxis.disabled && data.xAxis.timeData && !xAxisScaled) {
+        // from data choose the amount we can show
+        const timeDiff = metrics.xDataMax - metrics.xDataMin;
+        const labelSize = 62.5;
+        const visibleLabels = Math.floor(metrics.chartWidth / labelSize);
+        const step = Math.floor(data.series[0].data.length / visibleLabels);
+
+        const labelledData = data.series[0].data
+            .map((x, i) => {
+                if (i % step === 0 || step === 0) {
+                    return { date: new Date(x[0] as number), index: i };
+                } else {
+                    return null;
+                }
+            })
+            .filter((x) => x);
+
+        // find the format based on period
+        let format: (d: Date) => string;
+        const periodInDays = timeDiff / 8.64e7;
+
+        if (periodInDays < 2) {
+            // format 09:00 AM {size: 55 x 16}
+            format = timeFormat('%I:%M %p');
+        } else if (periodInDays < 65) {
+            // format Jan 21 { size: 35 x 16 }
+            format = timeFormat('%b %d');
+        } else {
+            // format Jan 2017 { size: 50 x 16 }
+            format = timeFormat('%b %Y');
+        }
+
+        metrics.xAxisPoints = [];
+        for (const d of labelledData) {
+            metrics.xAxisPoints.push({
+                text: format(d.date),
+                x: d.index,
+            });
         }
     }
 
@@ -183,6 +225,7 @@ function generateAxes(metrics: ChartMetrics) {
     // find the format based on period
     let format: (d: Date) => string;
     const periodInDays = timeDiff / 8.64e7;
+
     if (periodInDays < 2) {
         // format 09:00 AM {size: 55 x 16}
         format = timeFormat('%I:%M %p');
@@ -224,7 +267,7 @@ function generateAxes(metrics: ChartMetrics) {
     for (const date of range) {
         metrics.xAxisPoints.push({
             text: format(date),
-            x: date.getTime()
+            x: date.getTime(),
         });
     }
 }

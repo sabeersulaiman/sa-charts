@@ -6,7 +6,7 @@ import {
     Input,
     HostListener
 } from '@angular/core';
-import { LineChartMini } from '../../charts/line-chart-mini';
+import { LineChart } from '../../charts/line-chart-mini';
 import { SaChartDimensions, SaChartData } from '../../models/chart-data.model';
 import { LineChartConfig } from '../../models/line-data.model';
 
@@ -97,13 +97,13 @@ export class SaLineChartComponent implements AfterViewInit {
     /**
      * chart class
      */
-    private _chart: LineChartMini;
+    private _chart: LineChart;
 
     /**
      * construct the class
      */
     constructor() {
-        this._chart = new LineChartMini();
+        this._chart = new LineChart();
     }
 
     /**

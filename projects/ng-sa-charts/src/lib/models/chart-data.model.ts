@@ -17,8 +17,8 @@ export interface SaChartData {
 
 export interface SaSeries {
     name?: string;
-    data: ((number | number[])[])[];
-    color?: string;
+    data: (number | number[])[][];
+    color?: string | (string | string[])[];
 }
 
 export interface SaAxis {
@@ -34,5 +34,5 @@ export interface SaAxis {
 export const curveTypes = {
     linear: 'Linear',
     natural: 'Natural',
-    bundleBeta1: 'BundleBeta1'
+    bundleBeta1: 'BundleBeta1',
 };

@@ -30,7 +30,7 @@ export function defineColorFadingGradient(
     gradient
         .append('stop')
         .attr('offset', '100%')
-        .attr('style', `stop-color:${color};stop-opacity:0;`);
+        .attr('style', `stop-color:${color};stop-opacity:.1;`);
 }
 
 export function getIdFromColor(color: string, needPound = true) {

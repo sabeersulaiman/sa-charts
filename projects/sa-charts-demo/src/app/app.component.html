@@ -1,9 +1,18 @@
-<sa-line-chart
-    [data]="data"
-    [curve]="curveTypes.natural"
-    [showArea]="true"
-    [strokeWidth]="4"
-    [dimensions]="dems"
-></sa-line-chart>
-<button (click)="addSeries()" type="button">Add Series</button>
-<button (click)="updateSeries()" type="button">Update Series</button>
+<div class="flexer">
+    <sa-line-chart
+        [data]="data"
+        [curve]="curveTypes.natural"
+        [showArea]="true"
+        [strokeWidth]="4"
+        [dimensions]="dems"
+    ></sa-line-chart>
+    <sa-bar-chart
+        [data]="barData"
+        [dimensions]="dems"
+        [legend]="barlegends"
+    ></sa-bar-chart>
+</div>
+
+<div class="buttons">
+    <button (click)="updateBarData()">Update Bar Data</button>
+</div>
