@@ -1,16 +1,56 @@
-<div class="flexer">
-    <sa-line-chart
-        [data]="data"
-        [curve]="curveTypes.natural"
-        [showArea]="true"
-        [strokeWidth]="4"
-        [dimensions]="dems"
-    ></sa-line-chart>
-    <sa-bar-chart
-        [data]="barData"
-        [dimensions]="dems"
-        [legend]="barlegends"
-    ></sa-bar-chart>
+<div *ngIf="true" class="flexer">
+    <div class="lighter">
+        <sa-line-chart
+            [data]="data"
+            [curve]="curveTypes.natural"
+            [showArea]="true"
+            [strokeWidth]="4"
+            [dimensions]="dems"
+        ></sa-line-chart>
+    </div>
+
+    <div class="lighter">
+        <sa-line-chart
+            [data]="data2"
+            [curve]="curveTypes.natural"
+            [showArea]="true"
+            [strokeWidth]="4"
+            [dimensions]="dems"
+        ></sa-line-chart>
+    </div>
+    <div class="lighter">
+        <sa-bar-chart
+            [data]="barData"
+            [dimensions]="barDems"
+            [legend]="barlegends"
+            [tooltip]="true"
+        ></sa-bar-chart>
+    </div>
+</div>
+
+<div class="resp">
+    <div class="item">
+        <sa-line-chart
+            [data]="data"
+            [curve]="curveTypes.natural"
+            [showArea]="true"
+            [strokeWidth]="4"
+            [dimensions]="respDems"
+            [tooltip]="true"
+            [tooltipText]="'Movements'"
+        ></sa-line-chart>
+    </div>
+    <div class="item">
+        <sa-line-chart
+            [data]="data"
+            [curve]="curveTypes.natural"
+            [showArea]="true"
+            [strokeWidth]="4"
+            [dimensions]="respDems"
+            [tooltip]="true"
+            [tooltipText]="'Actions removed'"
+        ></sa-line-chart>
+    </div>
 </div>
 
 <div class="buttons">

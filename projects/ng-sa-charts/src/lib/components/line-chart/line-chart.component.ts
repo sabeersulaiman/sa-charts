@@ -4,22 +4,36 @@ import {
     ElementRef,
     AfterViewInit,
     Input,
-    HostListener
+    HostListener,
+    OnDestroy,
 } from '@angular/core';
 import { LineChart } from '../../charts/line-chart-mini';
 import { SaChartDimensions, SaChartData } from '../../models/chart-data.model';
 import { LineChartConfig } from '../../models/line-data.model';
+import { Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'sa-line-chart',
     templateUrl: './line-chart.component.html',
-    styleUrls: ['./line-chart.component.scss']
+    styleUrls: ['./line-chart.component.scss'],
 })
-export class SaLineChartComponent implements AfterViewInit {
+export class SaLineChartComponent implements AfterViewInit, OnDestroy {
     /**
      * field for data
      */
     private _data: SaChartData;
+
+    /**
+     * renders should be notified here
+     */
+    private $render = new Subject<void>();
+
+    private $destroy = new Subject<void>();
+
+    private $renderRequests = this.$render
+        .asObservable()
+        .pipe(takeUntil(this.$destroy), debounceTime(200));
 
     /**
      * data for the chart
@@ -57,6 +71,48 @@ export class SaLineChartComponent implements AfterViewInit {
     }
     public set curve(val: string) {
         this._curve = val;
+        this._render();
+    }
+
+    private _tooltipEnabled = false;
+
+    /**
+     * if true the chart will show y axis tooltip when hovered on
+     */
+    @Input()
+    public get tooltip() {
+        return this._tooltipEnabled;
+    }
+    public set tooltip(v: boolean) {
+        this._tooltipEnabled = v;
+        this._render();
+    }
+
+    private _tooltipText: string = null;
+
+    /**
+     * text to be shown along with the data in a tooltip
+     */
+    @Input()
+    public get tooltipText() {
+        return this._tooltipText;
+    }
+    public set tooltipText(v: string) {
+        this._tooltipText = v;
+        this._render();
+    }
+
+    private _heightFactor = 0.4;
+
+    /**
+     * height factor for the chart
+     */
+    @Input()
+    public get heightFactor() {
+        return this._heightFactor;
+    }
+    public set heightFactor(v: number) {
+        this._heightFactor = v;
         this._render();
     }
 
@@ -104,6 +160,8 @@ export class SaLineChartComponent implements AfterViewInit {
      */
     constructor() {
         this._chart = new LineChart();
+
+        this.$renderRequests.subscribe(() => this._renderChart());
     }
 
     /**
@@ -121,10 +179,14 @@ export class SaLineChartComponent implements AfterViewInit {
         this._render();
     }
 
+    public _render() {
+        this.$render.next();
+    }
+
     /**
      * render the chart onto the chart container
      */
-    private _render() {
+    private _renderChart() {
         if (
             this.data &&
             this.chartContainer &&
@@ -134,7 +196,10 @@ export class SaLineChartComponent implements AfterViewInit {
                 curve: this.curve,
                 showArea: this.showArea,
                 strokeWidth: this._strokeWidth,
-                dimensions: this._dimensions
+                dimensions: this._dimensions,
+                tooltipText: this._tooltipText,
+                tooltipEnabled: this._tooltipEnabled,
+                heightFactor: this._heightFactor,
             };
 
             this._chart.render(
@@ -151,5 +216,10 @@ export class SaLineChartComponent implements AfterViewInit {
         ) {
             console.error('Please give a valid data.');
         }
+    }
+
+    public ngOnDestroy() {
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 }

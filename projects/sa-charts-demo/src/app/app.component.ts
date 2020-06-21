@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { SaChartData, curveTypes } from 'ng-sa-charts';
 import { toChartData, generateData, generateBarData } from './data';
 import { SaChartDimensions } from 'projects/ng-sa-charts/src/public-api';
-import { timeDay, timeMonth, timeHour } from 'd3';
+import { timeDay, timeMonth, timeHour, CountableTimeInterval } from 'd3';
 
 @Component({
     selector: 'app-root',
@@ -13,6 +13,15 @@ export class AppComponent {
     dems: SaChartDimensions = {
         width: 440,
         height: 300,
+        margins: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+        },
+    };
+
+    respDems = {
         margins: {
             top: 0,
             bottom: 0,
@@ -37,6 +46,24 @@ export class AppComponent {
             // labelTransforms: 'rotate(70 30)',
             disabled: false,
             labelRotation: 335,
+        },
+    };
+
+    data2: SaChartData = {
+        series: [
+            {
+                data: toChartData(generateData(timeDay, 1, 20)),
+                name: 'Series-Test',
+                color: 'green',
+            },
+        ],
+        xAxis: {
+            timeData: true,
+            extendAreaToAxis: true,
+            // labelTransforms: 'rotate(70 30)',
+            disabled: false,
+            labelRotation: 335,
+            uppercase: true,
         },
     };
 
@@ -70,6 +97,17 @@ export class AppComponent {
         { color: '#E58320', name: 'TAT Exceed Limit' },
     ];
 
+    barDems: SaChartDimensions = {
+        width: 440,
+        height: 300,
+        margins: {
+            top: 10,
+            bottom: 50,
+            left: 20,
+            right: 30,
+        },
+    };
+
     constructor() {}
 
     updateBarData() {
@@ -92,5 +130,20 @@ export class AppComponent {
             ],
             xAxis: this.barData.xAxis,
         };
+    }
+
+    private _generateLineData(
+        interval: CountableTimeInterval,
+        step: number,
+        periodInInterval: number
+    ) {
+        const start = interval.floor(new Date());
+        const end = interval.offset(start, periodInInterval);
+
+        const range = interval.range(start, end, step);
+        return range.map((d) => ({
+            time: d.getTime(),
+            value: Math.round(Math.random() * 100),
+        }));
     }
 }

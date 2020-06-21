@@ -5,17 +5,20 @@ import {
     ElementRef,
     HostListener,
     AfterViewInit,
+    OnDestroy,
 } from '@angular/core';
 import { SaChartData, SaChartDimensions } from '../../models/chart-data.model';
 import { BarChart } from '../../charts/bar-chart';
 import { BarChartConfig } from '../../models/bar-chart-config.model';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 
 @Component({
     selector: 'sa-bar-chart',
     templateUrl: './bar-chart.component.html',
     styleUrls: ['./bar-chart.component.scss'],
 })
-export class SaBarChartComponent implements AfterViewInit {
+export class SaBarChartComponent implements AfterViewInit, OnDestroy {
     /**
      * field for data
      */
@@ -30,6 +33,20 @@ export class SaBarChartComponent implements AfterViewInit {
     }
     public set data(v: SaChartData) {
         this._data = v;
+        this._render();
+    }
+
+    private _tooltipEnabled = false;
+
+    /**
+     * if true the chart will show y axis tooltip when hovered on
+     */
+    @Input()
+    public get tooltip() {
+        return this._tooltipEnabled;
+    }
+    public set tooltip(v: boolean) {
+        this._tooltipEnabled = v;
         this._render();
     }
 
@@ -61,6 +78,31 @@ export class SaBarChartComponent implements AfterViewInit {
         this._render();
     }
 
+    private _heightFactor = 0.4;
+
+    /**
+     * height factor for the chart
+     */
+    @Input()
+    public get heightFactor() {
+        return this._heightFactor;
+    }
+    public set heightFactor(v: number) {
+        this._heightFactor = v;
+        this._render();
+    }
+
+    /**
+     * renders should be notified here
+     */
+    private $render = new Subject<void>();
+
+    private $destroy = new Subject<void>();
+
+    private $renderRequests = this.$render
+        .asObservable()
+        .pipe(takeUntil(this.$destroy), debounceTime(200));
+
     /**
      * container of the chart
      */
@@ -77,6 +119,8 @@ export class SaBarChartComponent implements AfterViewInit {
      */
     constructor() {
         this._chart = new BarChart();
+
+        this.$renderRequests.subscribe(() => this._renderChart());
     }
 
     /**
@@ -95,9 +139,16 @@ export class SaBarChartComponent implements AfterViewInit {
     }
 
     /**
-     * render the chart onto the chart container
+     * any new render requests should be initiated by calling this method
      */
     private _render() {
+        this.$render.next();
+    }
+
+    /**
+     * render the chart onto the chart container
+     */
+    private _renderChart() {
         if (
             this.data &&
             this.chartContainer &&
@@ -106,6 +157,8 @@ export class SaBarChartComponent implements AfterViewInit {
             const config: BarChartConfig = {
                 dimensions: this._dimensions,
                 legend: this._legend,
+                heightFactor: this.heightFactor,
+                tooltipEnabled: this._tooltipEnabled,
             };
 
             this._chart.render(
@@ -122,5 +175,10 @@ export class SaBarChartComponent implements AfterViewInit {
         ) {
             console.error('Please give a valid data.');
         }
+    }
+
+    public ngOnDestroy() {
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 }

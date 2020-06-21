@@ -12,6 +12,8 @@ import {
 import { computeChartMetrics } from '../helpers/chart.helper';
 
 export class BarChart implements Chart<SaChartData, BarChartConfig> {
+    private _container: HTMLElement;
+
     public render(
         data: SaChartData,
         container: HTMLElement,
@@ -25,8 +27,11 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
             container,
             config.dimensions,
             data,
+            config.heightFactor,
             false
         );
+
+        this._container = container;
 
         // create the svg
         let svg = svgContainer.select('svg').datum(data);
@@ -37,10 +42,17 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
 
         svg.attr('width', chartMetrics.svgWidth)
             .attr('height', chartMetrics.svgHeight)
+            // .style('background', '#ded')
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         // set the height for height correction
         svgContainer.style('height', chartMetrics.svgHeight + 'px');
+
+        if (config.tooltipEnabled) {
+            svgContainer.on('mouseleave', () => {
+                svgContainer.selectAll('div.bar-tooltip').remove();
+            });
+        }
 
         // draw the legend - if one exists
         let legendHeight = 0;
@@ -70,6 +82,8 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                       .style('align-items', 'center')
                       .style('justify-content', 'center')
                       .style('flex-wrap', 'wrap');
+
+            lb.style('margin-top', `${config.dimensions.margins.top}px`);
 
             const items = lb
                 .selectAll('div.legend-item')
@@ -154,6 +168,11 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                   .attr('class', 'bar-container')
                   .attr('pointer-events', 'all');
 
+        barContainer.attr(
+            'transform',
+            `translate(${config.dimensions.margins.left} 0)`
+        );
+
         // add some rects for highlighting the groups
         barContainer
             .selectAll('g.highlight-rects')
@@ -197,7 +216,9 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                 (update) => update,
                 (exit) => exit.remove()
             )
-            .call(this._addBarGroups(data, barDimensions));
+            .call(
+                this._addBarGroups(data, barDimensions, config.tooltipEnabled)
+            );
 
         // draw x axis
         if (chartMetrics.xAxisPoints) {
@@ -212,6 +233,11 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                     (exit) => exit.remove()
                 );
 
+            group.attr(
+                'transform',
+                `translate(${config.dimensions.margins.left} 0)`
+            );
+
             const labels = group
                 .selectAll('text.x-axis-label')
                 .data(chartMetrics.xAxisPoints);
@@ -221,7 +247,13 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                 .append('text')
                 .classed('x-axis-label', true)
                 .merge(svg.selectAll('text.x-axis-label') as any)
-                .text((d) => d.text)
+                .text((d) => {
+                    if (data.xAxis.uppercase) {
+                        return d.text.toUpperCase();
+                    } else {
+                        return d.text;
+                    }
+                })
                 .attr('text-anchor', 'middle')
                 .attr(
                     'x',
@@ -229,7 +261,7 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                         d.x * barDimensions.singleSize +
                         barDimensions.singleSize / 2
                 )
-                .attr('y', chartMetrics.xAxisLabelStart)
+                .attr('y', chartMetrics.xAxisLabelStart - 10)
                 .style('font-size', '13px')
                 .each((d, i, labelSelection) => {
                     const label = labelSelection[i];
@@ -250,7 +282,11 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
         }
     }
 
-    private _addBarGroups(data: SaChartData, barDimensions: BarDimensions) {
+    private _addBarGroups(
+        data: SaChartData,
+        barDimensions: BarDimensions,
+        tooltipEnabled: boolean
+    ) {
         return (
             sel: Selection<SVGGElement, (number | number[])[], any, any>
         ) => {
@@ -272,7 +308,9 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                         `translateX(${barDimensions.itemGap}px)`
                     );
 
-                bars.call(this._addBars(data, barDimensions, i));
+                bars.call(
+                    this._addBars(data, barDimensions, i, tooltipEnabled)
+                );
             });
         };
     }
@@ -280,7 +318,8 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
     private _addBars(
         data: SaChartData,
         barDimensions: BarDimensions,
-        groupIndex: number
+        groupIndex: number,
+        tooltipEnabled: boolean
     ) {
         return (sel: Selection<SVGGElement, number | number[], any, any>) => {
             sel.each((d, i, bars) => {
@@ -313,18 +352,92 @@ export class BarChart implements Chart<SaChartData, BarChartConfig> {
                     .selectAll('rect.bar-item')
                     .data(itemData)
                     .join(
-                        (enter) =>
-                            enter.append('rect').attr('class', 'bar-item'),
+                        (enter) => {
+                            const enters = enter
+                                .append('rect')
+                                .attr('class', 'bar-item');
+
+                            if (tooltipEnabled) {
+                                enters.on(
+                                    'mouseenter',
+                                    this._handleBarMouseOver.bind(this)
+                                );
+                            }
+
+                            return enters;
+                        },
                         (update) => update,
                         (exit) => exit.remove()
                     )
                     .attr('x', (item) => item.startX)
                     .attr('y', (item) => item.startY)
                     .attr('width', (item) => item.width)
-                    .attr('height', (item) => item.height)
+                    .attr('height', (item) =>
+                        isNaN(item.height) ? 0 : item.height
+                    )
                     .attr('fill', (item) => item.color);
             });
         };
+    }
+
+    private _handleBarMouseOver(
+        d: BarItemData,
+        eIndex: number,
+        rects: SVGRectElement[]
+    ) {
+        const rect = rects[eIndex];
+        if (rect) {
+            const rectBox = rect.getBoundingClientRect();
+            const containerBox = this._container.getBoundingClientRect();
+
+            // figure out if the placement should be on the left or right
+            const rectCenter = (rectBox.left + rectBox.right) / 2;
+            const percent =
+                ((rectCenter - containerBox.left) / containerBox.width) * 100;
+
+            let isLeft = false;
+            if (percent > 50) {
+                isLeft = true;
+            }
+
+            const point: { x?: number; y?: number } = {
+                y:
+                    rectBox.top -
+                    containerBox.top +
+                    (rectBox.bottom - rectBox.top) / 2,
+            };
+
+            // figure out the placement location
+            if (isLeft) {
+                point.x =
+                    containerBox.width -
+                    (rectBox.left - containerBox.left) +
+                    12;
+            } else {
+                point.x = rectBox.left - containerBox.left + rectBox.width + 12;
+            }
+
+            // draw the item
+            select(this._container)
+                .selectAll('div.bar-tooltip')
+                .data([d])
+                .join(
+                    (en) =>
+                        en
+                            .append('div')
+                            .classed('bar-tooltip', true)
+                            .style('position', 'absolute')
+                            .style('transform', 'translateY(-50%)'),
+                    (up) =>
+                        up
+                            .style(isLeft ? 'right' : 'left', point.x + 'px')
+                            .style(isLeft ? 'left' : 'right', 'unset')
+                            .style('top', point.y + 'px')
+                            .style('background', d.color)
+                            .html('<p class="value">' + d.data + '</p>'),
+                    (ex) => ex.remove()
+                );
+        }
     }
 }
 

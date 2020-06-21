@@ -29,6 +29,7 @@ export interface SaAxis {
     disabled?: boolean;
     extendAreaToAxis?: boolean;
     labelRotation?: number;
+    uppercase?: boolean;
 }
 
 export const curveTypes = {

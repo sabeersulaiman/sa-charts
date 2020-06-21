@@ -1,3 +1,5 @@
+import { SaChartDimensions } from './chart-data.model';
+
 export interface ChartMetrics {
     svgWidth?: number;
     svgHeight?: number;
@@ -14,4 +16,6 @@ export interface ChartMetrics {
     xAxisPoints?: { text: string; x: number }[];
     xAxisLabelStart?: number;
     xAxisInclusiveArea?: number;
+    dimensions?: SaChartDimensions;
+    xFormatter?: (d: Date) => string;
 }

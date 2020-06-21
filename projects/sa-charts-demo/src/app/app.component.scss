@@ -3,4 +3,17 @@
     align-items: center;
     justify-content: space-around;
     flex-wrap: wrap;
+    &.lighter {
+        background-color: #dedede;
+    }
+}
+
+.resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 40px;
+    max-width: 100vw;
+    .item {
+        overflow: hidden;
+    }
 }

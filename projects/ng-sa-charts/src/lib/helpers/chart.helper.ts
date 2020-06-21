@@ -12,11 +12,11 @@ import {
     timeWeek,
 } from 'd3';
 
-function fixDemensions(node: HTMLElement, dems: SaChartDimensions) {
+function fixDemensions(node: HTMLElement, dems: SaChartDimensions, heightFactor: number) {
     const possibleWidth = node ? node.getBoundingClientRect().width : 300;
-    const defaultDems: SaChartDimensions = {
+    const computedDems: SaChartDimensions = {
         width: possibleWidth,
-        height: possibleWidth * 0.4,
+        height: possibleWidth * heightFactor,
         margins: {
             top: 50,
             left: 50,
@@ -26,51 +26,51 @@ function fixDemensions(node: HTMLElement, dems: SaChartDimensions) {
     };
 
     if (dems) {
-        if (!dems.width) {
-            dems.width = defaultDems.width;
+        if (dems.width) {
+            computedDems.width = dems.width;
         }
 
-        if (!dems.height) {
-            dems.height = dems.width * 0.4;
+        if (dems.height) {
+            computedDems.height = dems.height;
+        } else {
+            computedDems.height = computedDems.width * heightFactor;
         }
 
-        if (!dems.margins) {
-            dems.margins = defaultDems.margins;
+        if (dems.margins) {
+            computedDems.margins.top =
+                dems.margins.top === undefined
+                    ? computedDems.margins.top
+                    : dems.margins.top;
+            computedDems.margins.right =
+                dems.margins.right === undefined
+                    ? computedDems.margins.right
+                    : dems.margins.right;
+            computedDems.margins.bottom =
+                dems.margins.bottom === undefined
+                    ? computedDems.margins.bottom
+                    : dems.margins.bottom;
+            computedDems.margins.left =
+                dems.margins.left === undefined
+                    ? computedDems.margins.left
+                    : dems.margins.left;
         }
-
-        if (dems.margins.top === undefined) {
-            dems.margins.top = defaultDems.margins.top;
-        }
-
-        if (dems.margins.right === undefined) {
-            dems.margins.right = defaultDems.margins.right;
-        }
-
-        if (dems.margins.bottom === undefined) {
-            dems.margins.bottom = defaultDems.margins.bottom;
-        }
-
-        if (dems.margins.left === undefined) {
-            dems.margins.left = defaultDems.margins.left;
-        }
-    } else {
-        // set the default dems
-        dems = defaultDems;
     }
 
-    return dems;
+    return computedDems;
 }
 
 export function computeChartMetrics(
     node: HTMLElement,
     dems: SaChartDimensions,
     data: SaChartData,
+    heightFactor: number,
     xAxisScaled: boolean = true
 ): ChartMetrics {
     const metrics: ChartMetrics = {};
-    const xAxisHeight = 50;
+    const xAxisHeight = 65;
 
-    dems = fixDemensions(node, dems);
+    dems = fixDemensions(node, dems, heightFactor);
+    metrics.dimensions = dems;
 
     // calculate the svg width & height
     metrics.svgWidth = dems.width;
@@ -207,6 +207,8 @@ export function computeChartMetrics(
                 x: d.index,
             });
         }
+
+        metrics.xFormatter = format;
     }
 
     return metrics;
@@ -240,7 +242,7 @@ function generateAxes(metrics: ChartMetrics) {
         if (start.getHours() !== 0) {
             range.push(start);
         }
-        range = timeDay.range(start, end, 7);
+        range = timeDay.range(start, end, 1);
         range.push(end);
     } else {
         // format Jan 2017 { size: 50 x 16 }
@@ -257,11 +259,13 @@ function generateAxes(metrics: ChartMetrics) {
     );
     const skipCount = Math.floor(range.length / possibleLabels);
 
-    range = range.filter((_x, i) => {
-        if (i === 0 || i === range.length - 1 || i % skipCount === 0) {
-            return true;
-        }
-    });
+    if (skipCount !== 0) {
+        range = range.filter((_x, i) => {
+            if (i === 0 || i === range.length - 1 || i % skipCount === 0) {
+                return true;
+            }
+        });
+    }
 
     metrics.xAxisPoints = [];
     for (const date of range) {
@@ -270,4 +274,6 @@ function generateAxes(metrics: ChartMetrics) {
             x: date.getTime(),
         });
     }
+
+    metrics.xFormatter = format;
 }
