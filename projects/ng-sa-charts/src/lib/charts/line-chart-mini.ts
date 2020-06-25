@@ -305,7 +305,7 @@ export class LineChart implements Chart<SaChartData, LineChartConfig> {
                     bestDiff = nDiff;
                 } else if (bestDiff <= nDiff) {
                     i = i - 1;
-                    bestData = series.data[i - 1];
+                    bestData = series.data[i];
                     break;
                 }
             }
