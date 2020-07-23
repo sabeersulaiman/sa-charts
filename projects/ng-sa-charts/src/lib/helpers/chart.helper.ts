@@ -242,7 +242,7 @@ function generateAxes(metrics: ChartMetrics) {
         if (start.getHours() !== 0) {
             range.push(start);
         }
-        range = timeDay.range(start, end, 1);
+        range.push(...timeDay.range(start, end, 1));
         range.push(end);
     } else {
         // format Jan 2017 { size: 50 x 16 }
@@ -250,7 +250,7 @@ function generateAxes(metrics: ChartMetrics) {
         if (start.getDate() !== 1) {
             range.push(start);
         }
-        range = timeMonth.range(start, end, 1);
+        range.push(...timeMonth.range(start, end, 1));
         range.push(end);
     }
 

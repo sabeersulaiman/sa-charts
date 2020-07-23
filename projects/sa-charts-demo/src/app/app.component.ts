@@ -21,6 +21,26 @@ export class AppComponent {
         },
     };
 
+    testData = {
+        status: true,
+        message: 'Success',
+        debugMessage: null,
+        data: {
+            completed: 136,
+            pending: 32,
+            data: [
+                { time: 1594771200000, value: 0 },
+                { time: 1594857600000, value: 0 },
+                { time: 1594944000000, value: 0 },
+                { time: 1595030400000, value: 0 },
+                { time: 1595116800000, value: 0 },
+                { time: 1595203200000, value: 0 },
+                { time: 1595289600000, value: 0 },
+                { time: 1595376000000, value: 136 },
+            ],
+        },
+    };
+
     respDems = {
         margins: {
             top: 0,
@@ -35,7 +55,8 @@ export class AppComponent {
     data: SaChartData = {
         series: [
             {
-                data: toChartData(generateData(timeHour, 1, 30)),
+                // data: toChartData(generateData(timeHour, 1, 30)),
+                data: this.testData.data.data.map((x) => [x.time, x.value]),
                 name: 'Series - A',
                 color: 'green',
             },

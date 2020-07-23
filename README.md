@@ -22,7 +22,7 @@ yarn lib-dev
 In second terminal run the following command to build the demo application:
 
 ```sh
-yarn demo-devs
+yarn demo-dev
 ```
 
 You can also choose to link the library to your own project if required, after running the `yarn lib-build` once.
